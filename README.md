@@ -12,7 +12,7 @@ happy_pdf 是一个面向扫描件 PDF 的局部智能编辑工具。它会把 P
 请帮我把 happy_pdf 安装到我的电脑并启动到可访问状态。
 
 GitHub 仓库地址：
-https://github.com/<你的用户名>/<你的仓库名>
+https://github.com/shaopengDaJiDaLi/happy_pdf_v2
 
 安装目录：
 ~/apps/happy_pdf
