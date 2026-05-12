@@ -1,0 +1,11 @@
+services:
+  happy_pdf:
+    build: .
+    container_name: happy_pdf
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/data:/app/backend/data
+    restart: unless-stopped

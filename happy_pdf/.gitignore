@@ -1,0 +1,21 @@
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Node / frontend builds
+frontend/node_modules/
+frontend/dist/
+
+# Runtime data
+backend/data/**
+backend/backend/data/**
+!backend/data/
+!backend/data/**/
+!backend/data/**/.gitkeep
+
+# Logs and local OS files
+*.log
+.DS_Store
