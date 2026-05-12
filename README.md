@@ -69,14 +69,12 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
    - 如果同一个 API Key 同时支持 gpt-5.5 和 gpt-image-2，就把 TEXT_OPENAI_API_KEY 和 IMAGE_OPENAI_API_KEY 填成同一个 Key。
    - 如果购买的 gpt-5.5 API 不支持 gpt-image-2，就必须单独购买或开通 gpt-image-2 API，并把它填到 IMAGE_OPENAI_API_KEY。
    - 如果我没有提供真实 Key，只保留 .env 模板并提醒我填写，不要编造 Key。
-5. 优先使用 Docker 安装和启动：
-   docker compose up --build
-6. 如果 Docker 不可用，则使用本地安装方式：
-   - 创建 Python 虚拟环境
-   - 安装 backend/requirements.txt
-   - 安装 frontend/package.json 里的 npm 依赖
-   - 构建前端
-   - 使用 ./start.sh 启动服务
+5. 不要强制使用 Docker，默认使用本地 Python + npm 安装。
+6. 按当前系统选择启动方式：
+   - Ubuntu/Linux 使用已验证的 start.sh。
+   - macOS 使用 python3 scripts/setup_local.py 和 python3 scripts/start_local.py。
+   - Windows 使用 PowerShell 执行 .\setup.ps1 和 .\start.ps1。
+   - 只有我明确要求 Docker 时，才使用 docker compose up --build。
 7. 启动后检查 http://localhost:8000/api/health 是否正常。
 8. 最后告诉我：
    - 安装目录
@@ -131,8 +129,8 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
 系统依赖：
 
 - Node.js 20+ 和 npm
-- Tesseract OCR，可选；Docker 镜像中会自动安装
-- Docker 和 Docker Compose，可选但推荐
+- Tesseract OCR，可选；不装 OCR 也能运行
+- Docker 和 Docker Compose，可选，不是必须
 
 ## 目录结构
 
@@ -156,39 +154,96 @@ happyPDF_v3/
     .env.example
     Dockerfile
     docker-compose.yml
+    setup.ps1
     start.sh
+    start.ps1
+    scripts/
 ```
 
-## 快速启动：Docker
+## 本地启动优先
 
-推荐用 Docker 启动，前端构建、后端依赖和 OCR 系统依赖都会在镜像中处理。
+本项目不强制使用 Docker。Ubuntu 上已经验证过的方式继续使用现有 `start.sh`；macOS 和 Windows 使用新增的本地补丁脚本安装和启动。
+
+### Ubuntu：使用已验证的现有代码
 
 ```bash
 cd happy_pdf
 cp .env.example .env
-docker compose up --build
 ```
 
-启动后访问：
+编辑 `.env` 后安装依赖：
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+cd ../frontend
+npm install
+npm run build
+```
+
+启动：
+
+```bash
+cd ..
+chmod +x start.sh
+./start.sh
+```
+
+默认访问：
 
 ```text
-http://localhost:8000
+http://127.0.0.1:8000
 ```
 
-API 文档：
+### macOS：使用本地补丁脚本
 
-```text
-http://localhost:8000/docs
+先安装系统依赖：
+
+```bash
+brew install python node
 ```
 
-## 本地启动
+进入项目并安装：
+
+```bash
+cd happy_pdf
+cp .env.example .env
+python3 scripts/setup_local.py
+python3 scripts/start_local.py
+```
+
+如果需要 OCR，再安装：
+
+```bash
+brew install tesseract
+```
+
+### Windows：使用 PowerShell 补丁脚本
+
+先安装：
+
+- Python 3.10+，安装时勾选 Add Python to PATH。
+- Node.js 20+ LTS。
+
+然后在 PowerShell 中执行：
+
+```powershell
+cd happy_pdf
+Copy-Item .env.example .env
+.\setup.ps1
+.\start.ps1
+```
+
+如果 PowerShell 阻止脚本执行，先在当前终端临时允许：
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
 
 ### 1. 配置环境变量
-
-```bash
-cd happy_pdf
-cp .env.example .env
-```
 
 真实模型能力需要同时配置 TEXT API 和 IMAGE API：
 
@@ -229,6 +284,8 @@ OPENAI_DISABLE=1
 
 ### 2. 安装后端依赖
 
+Ubuntu 手动安装方式：
+
 ```bash
 cd happy_pdf/backend
 python3 -m venv .venv
@@ -264,6 +321,8 @@ macOS 可以使用：
 brew install tesseract
 ```
 
+Windows 不装 OCR 也能运行。OCR 只是辅助识别选区文字；如需 OCR，可自行安装 Tesseract 并把安装目录加入 PATH。
+
 ### 3. 安装前端依赖
 
 ```bash
@@ -285,12 +344,24 @@ lucide-react
 
 ### 4. 一键启动
 
-项目提供了启动脚本，会在缺少前端构建产物时自动执行 `npm install` 和 `npm run build`，然后由 FastAPI 托管前端静态文件。
+Ubuntu 使用已验证的 `start.sh`。macOS 和 Windows 可以使用 `scripts/start_local.py` / `start.ps1`，它们会在缺少前端构建产物时自动执行 `npm install` 和 `npm run build`，然后由 FastAPI 托管前端静态文件。
 
 ```bash
 cd happy_pdf
 chmod +x start.sh
 ./start.sh
+```
+
+macOS：
+
+```bash
+python3 scripts/start_local.py
+```
+
+Windows：
+
+```powershell
+.\start.ps1
 ```
 
 默认访问：
@@ -305,7 +376,29 @@ http://127.0.0.1:8000
 PORT=8010 ./start.sh
 ```
 
-### 5. 开发模式启动
+Windows PowerShell 指定端口：
+
+```powershell
+$env:PORT="8010"; .\start.ps1
+```
+
+## Docker 可选
+
+Docker 不是必须项。如果用户愿意使用 Docker，可以这样启动：
+
+```bash
+cd happy_pdf
+cp .env.example .env
+docker compose up --build
+```
+
+启动后访问：
+
+```text
+http://localhost:8000
+```
+
+## 开发模式启动
 
 如果需要前后端分开开发，开两个终端。
 

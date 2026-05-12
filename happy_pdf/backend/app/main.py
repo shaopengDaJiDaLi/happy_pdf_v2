@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,7 +7,6 @@ from fastapi.exceptions import RequestValidationError
 from app.api.routes import router
 from app.utils.config import ensure_data_dirs, settings
 
-load_dotenv()
 ensure_data_dirs()
 
 app = FastAPI(

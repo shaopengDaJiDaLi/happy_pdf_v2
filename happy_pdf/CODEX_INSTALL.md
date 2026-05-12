@@ -22,9 +22,9 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
    - 如果购买的 gpt-5.5 API 不支持 gpt-image-2，就必须单独购买或开通 gpt-image-2 API，并把它填到 IMAGE_OPENAI_API_KEY。
    - 如果两个 API 来自不同供应商或不同网关，要分别配置 TEXT_OPENAI_BASE_URL 和 IMAGE_OPENAI_BASE_URL。
 3. 如果我没有提供真实 Key，只复制 .env.example 为 .env，并提醒我填写；不要编造 Key。
-4. 然后检查系统环境：git、Docker、docker compose、Python3、pip、Node.js、npm。
-5. 如果 Docker 和 docker compose 可用，优先使用 Docker 安装。
-6. 如果 Docker 不可用，再使用本地 Python + npm 方式安装。
+4. 然后检查系统环境：git、Python3、pip、Node.js、npm。Docker 不是必须项。
+5. 默认使用本地 Python + npm 方式安装，不要优先使用 Docker。
+6. Ubuntu 使用项目已有的 start.sh；macOS 和 Windows 使用跨平台补丁脚本。
 7. 安装过程中不要删除我电脑上的其他文件。
 8. 不要覆盖已有 .env。
 9. 不要写入真实 API Key，除非我明确提供。
@@ -41,14 +41,21 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
    - IMAGE_OPENAI_API_KEY、IMAGE_OPENAI_BASE_URL、IMAGE_OPENAI_MODEL=gpt-image-2。
    - 如果 TEXT 和 IMAGE 使用同一个 API Key，要明确告诉我。
    - 如果 IMAGE_OPENAI_API_KEY 为空，要提醒我：有些 gpt-5.5 API 不支持 gpt-image-2，需要单独购买或开通 gpt-image-2 API。
-6. 优先执行 Docker 启动：
-   docker compose up --build
-7. 如果 Docker 不可用或启动失败，请改用本地启动：
-   - 进入 backend，创建 Python 虚拟环境 .venv。
-   - 安装 backend/requirements.txt。
-   - 进入 frontend，执行 npm install。
-   - 执行 npm run build。
-   - 回到项目目录，执行 ./start.sh。
+6. 按当前系统选择本地安装和启动：
+   - Ubuntu/Linux：
+     1. 进入 backend，创建 Python 虚拟环境 .venv。
+     2. 安装 backend/requirements.txt。
+     3. 进入 frontend，执行 npm install 和 npm run build。
+     4. 回到项目目录，执行 ./start.sh。
+   - macOS：
+     1. 确认已安装 Python 3.10+ 和 Node.js 20+。
+     2. 执行 python3 scripts/setup_local.py。
+     3. 执行 python3 scripts/start_local.py。
+   - Windows：
+     1. 确认已安装 Python 3.10+ 和 Node.js 20+。
+     2. 在 PowerShell 执行 .\setup.ps1。
+     3. 在 PowerShell 执行 .\start.ps1。
+7. 不要强制安装 Docker。只有我明确要求 Docker 时，才使用 docker compose up --build。
 8. 启动后检查：
    - http://localhost:8000/api/health
    - http://localhost:8000/docs
@@ -56,7 +63,7 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
 
 安装完成后请输出：
 1. 安装目录。
-2. 使用的是 Docker 方式还是本地方式。
+2. 使用的是哪个系统的本地启动方式。
 3. 启动命令。
 4. 访问地址。
 5. API 文档地址。
@@ -66,7 +73,7 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
 
 ## 本项目依赖
 
-Codex 安装时会根据环境优先选择 Docker。Docker 不可用时，需要本机具备：
+默认本地安装，不强制使用 Docker。需要本机具备：
 
 - Python 3.10+
 - Node.js 20+
@@ -74,7 +81,7 @@ Codex 安装时会根据环境优先选择 Docker。Docker 不可用时，需要
 - git
 - 可选：Tesseract OCR
 
-Docker 方式会在镜像中安装后端依赖、前端依赖和 OCR 相关系统依赖。
+Ubuntu 使用现有 `start.sh`；macOS 可使用 `python3 scripts/setup_local.py` 和 `python3 scripts/start_local.py`；Windows 可使用 `setup.ps1` 和 `start.ps1`。Docker 只作为可选部署方式保留。
 
 ## API Key 配置
 

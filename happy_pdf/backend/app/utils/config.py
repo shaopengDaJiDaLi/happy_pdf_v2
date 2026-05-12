@@ -3,7 +3,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+_BACKEND_DIR = Path(__file__).resolve().parents[2]
+_PROJECT_DIR = _BACKEND_DIR.parent
+
+load_dotenv(_PROJECT_DIR / ".env")
+load_dotenv(_BACKEND_DIR / ".env", override=True)
 
 
 def _env_bool(name: str, default: str = "0") -> bool:
@@ -23,8 +27,8 @@ def _project_path(project_dir: Path, value: str | Path) -> Path:
 
 
 class Settings:
-    BACKEND_DIR = Path(__file__).resolve().parents[2]
-    PROJECT_DIR = BACKEND_DIR.parent
+    BACKEND_DIR = _BACKEND_DIR
+    PROJECT_DIR = _PROJECT_DIR
     DATA_DIR = _project_path(
         PROJECT_DIR,
         os.getenv("HAPPY_PDF_DATA_DIR", BACKEND_DIR / "data"),
