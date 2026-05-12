@@ -4,6 +4,47 @@ happy_pdf 是一个面向扫描件 PDF 的局部智能编辑工具。它会把 P
 
 下面的命令默认在当前 `happy_pdf/` 目录执行；如果你在外层仓库根目录，请先执行 `cd happy_pdf`。
 
+## 首要步骤：购买/开通并配置模型 API Key
+
+真实编辑效果必须同时用到两个模型能力：
+
+- `gpt-5.5`：TEXT API，用来把用户输入的短指令扩写成稳定的图像编辑提示词。
+- `gpt-image-2`：IMAGE API，用来真正编辑 PDF 页面中框选出来的局部图片。
+
+所以在让 Codex 安装和启动项目之前，先购买或开通可用的模型 API，并确认 API 是否同时支持 `gpt-5.5` 和 `gpt-image-2`。有些 API 只支持 `gpt-5.5` 文本模型，不支持 `gpt-image-2` 图像模型；这种情况下需要单独购买或开通支持 `gpt-image-2` 的 API。如果你的同一个 API 已经同时支持这两个模型，就不需要单独购买图像 API，`.env` 里把 TEXT 和 IMAGE 配成同一个 API Key 即可。
+
+先创建 `.env`：
+
+```bash
+cp .env.example .env
+```
+
+情况一：同一个 API Key 同时支持 `gpt-5.5` 和 `gpt-image-2`，`.env` 这样填：
+
+```bash
+TEXT_OPENAI_API_KEY=sk-your-one-api-key
+TEXT_OPENAI_BASE_URL=https://api.openai.com/v1
+TEXT_OPENAI_MODEL=gpt-5.5
+
+IMAGE_OPENAI_API_KEY=sk-your-one-api-key
+IMAGE_OPENAI_BASE_URL=https://api.openai.com/v1
+IMAGE_OPENAI_MODEL=gpt-image-2
+```
+
+情况二：购买的 `gpt-5.5` API 不支持 `gpt-image-2`，需要单独购买图像 API，`.env` 这样填：
+
+```bash
+TEXT_OPENAI_API_KEY=sk-your-gpt55-api-key
+TEXT_OPENAI_BASE_URL=https://api.openai.com/v1
+TEXT_OPENAI_MODEL=gpt-5.5
+
+IMAGE_OPENAI_API_KEY=sk-your-gpt-image-2-api-key
+IMAGE_OPENAI_BASE_URL=https://api.openai.com/v1
+IMAGE_OPENAI_MODEL=gpt-image-2
+```
+
+如果你的两个 API 来自不同供应商或不同网关，把各自提供的 `BASE_URL` 分别填到 `TEXT_OPENAI_BASE_URL` 和 `IMAGE_OPENAI_BASE_URL`。不要把 `.env` 提交到 GitHub。
+
 ## 使用 Codex 安装
 
 如果你已经安装了 Codex，可以直接把下面这段提示词复制给 Codex，让它自动完成安装、依赖配置、启动和验证。
@@ -20,17 +61,23 @@ https://github.com/shaopengDaJiDaLi/happy_pdf_v2
 要求：
 1. 克隆或更新这个 GitHub 仓库。
 2. 进入项目目录。如果仓库根目录下面有 happy_pdf 子目录，就进入 happy_pdf；如果当前仓库根目录本身就是项目目录，就留在当前目录。
-3. 如果没有 .env，就从 .env.example 复制一份；不要覆盖已有 .env。
-4. 优先使用 Docker 安装和启动：
+3. 首要步骤是购买/开通并配置模型 API：如果没有 .env，就从 .env.example 复制一份；不要覆盖已有 .env。
+4. 真实编辑必须配置两类模型 API：
+   - TEXT API 使用 gpt-5.5。
+   - IMAGE API 使用 gpt-image-2。
+   - 如果同一个 API Key 同时支持 gpt-5.5 和 gpt-image-2，就把 TEXT_OPENAI_API_KEY 和 IMAGE_OPENAI_API_KEY 填成同一个 Key。
+   - 如果购买的 gpt-5.5 API 不支持 gpt-image-2，就必须单独购买或开通 gpt-image-2 API，并把它填到 IMAGE_OPENAI_API_KEY。
+   - 如果我没有提供真实 Key，只保留 .env 模板并提醒我填写，不要编造 Key。
+5. 优先使用 Docker 安装和启动：
    docker compose up --build
-5. 如果 Docker 不可用，则使用本地安装方式：
+6. 如果 Docker 不可用，则使用本地安装方式：
    - 创建 Python 虚拟环境
    - 安装 backend/requirements.txt
    - 安装 frontend/package.json 里的 npm 依赖
    - 构建前端
    - 使用 ./start.sh 启动服务
-6. 启动后检查 http://localhost:8000/api/health 是否正常。
-7. 最后告诉我：
+7. 启动后检查 http://localhost:8000/api/health 是否正常。
+8. 最后告诉我：
    - 安装目录
    - 启动命令
    - 访问地址
@@ -138,17 +185,41 @@ http://localhost:8000/docs
 cp .env.example .env
 ```
 
+真实模型能力需要同时配置 TEXT API 和 IMAGE API：
+
+- `TEXT_OPENAI_API_KEY` 对应 `gpt-5.5`，负责指令理解和提示词增强。
+- `IMAGE_OPENAI_API_KEY` 对应 `gpt-image-2`，负责局部图像编辑。
+
+如果同一个 API Key 同时支持 `gpt-5.5` 和 `gpt-image-2`：
+
+```bash
+TEXT_OPENAI_API_KEY=sk-your-one-api-key
+TEXT_OPENAI_BASE_URL=https://api.openai.com/v1
+TEXT_OPENAI_MODEL=gpt-5.5
+
+IMAGE_OPENAI_API_KEY=sk-your-one-api-key
+IMAGE_OPENAI_BASE_URL=https://api.openai.com/v1
+IMAGE_OPENAI_MODEL=gpt-image-2
+```
+
+如果购买的 `gpt-5.5` API 不支持 `gpt-image-2`，需要单独购买或开通 `gpt-image-2` API：
+
+```bash
+TEXT_OPENAI_API_KEY=sk-your-gpt55-api-key
+TEXT_OPENAI_BASE_URL=https://api.openai.com/v1
+TEXT_OPENAI_MODEL=gpt-5.5
+
+IMAGE_OPENAI_API_KEY=sk-your-gpt-image-2-api-key
+IMAGE_OPENAI_BASE_URL=https://api.openai.com/v1
+IMAGE_OPENAI_MODEL=gpt-image-2
+```
+
+如果两个 API 的服务地址不同，分别填写对应的 `TEXT_OPENAI_BASE_URL` 和 `IMAGE_OPENAI_BASE_URL`。
+
 如果只是本地验证流程，可以先关闭模型调用：
 
 ```bash
 OPENAI_DISABLE=1
-```
-
-如果要使用真实模型能力，需要在 `.env` 中配置：
-
-```bash
-TEXT_OPENAI_API_KEY=sk-...
-IMAGE_OPENAI_API_KEY=sk-...
 ```
 
 ### 2. 安装后端依赖
@@ -278,18 +349,20 @@ Vite 已配置代理，开发环境下 `/api` 和 `/data` 会转发到 `http://1
 
 `.env.example` 已包含完整模板。常用配置如下：
 
+真实编辑效果需要同时配置 `gpt-5.5` 和 `gpt-image-2`。如果你的 `gpt-5.5` API 不支持 `gpt-image-2`，必须单独购买或开通图像 API；如果同一个 API 同时支持两个模型，`TEXT_OPENAI_API_KEY` 和 `IMAGE_OPENAI_API_KEY` 可以填写同一个 Key。
+
 | 变量 | 默认值 | 说明 |
 | --- | --- | --- |
 | `HAPPY_PDF_DATA_DIR` | `backend/data` | 运行时文件目录，包括上传、渲染、裁剪、编辑结果和日志 |
 | `PDF_RENDER_SCALE` | `3` | PDF 页面渲染倍率，越高越清晰，占用也越大 |
 | `OCR_ENGINE` | `auto` | OCR 引擎，`auto` 会优先尝试可用 OCR |
 | `OCR_LANG` | `chi_sim+eng` | OCR 语言 |
-| `TEXT_OPENAI_API_KEY` | 空 | 文本理解和指令增强 API Key |
+| `TEXT_OPENAI_API_KEY` | 空 | `gpt-5.5` 文本理解和指令增强 API Key |
 | `TEXT_OPENAI_BASE_URL` | `https://api.openai.com/v1` | 文本模型 API 地址 |
 | `TEXT_OPENAI_MODEL` | `gpt-5.5` | 文本指令增强模型 |
 | `TEXT_OPENAI_DISABLE` | `0` | 设为 `1` 时关闭文本模型调用 |
 | `TEXT_FALLBACK_ON_ERROR` | `0` | 文本模型失败后是否使用本地 fallback |
-| `IMAGE_OPENAI_API_KEY` | 空 | 局部图像编辑 API Key |
+| `IMAGE_OPENAI_API_KEY` | 空 | `gpt-image-2` 局部图像编辑 API Key；可与 TEXT Key 相同，也可单独配置 |
 | `IMAGE_OPENAI_BASE_URL` | `https://api.openai.com/v1` | 图像模型 API 地址 |
 | `IMAGE_OPENAI_MODEL` | `gpt-image-2` | 局部图像编辑模型 |
 | `IMAGE_OPENAI_DISABLE` | `0` | 设为 `1` 时关闭图像模型调用 |
@@ -349,7 +422,7 @@ logs/        # 任务日志
 
 ### 没有配置 API Key 能不能运行？
 
-可以。设置 `OPENAI_DISABLE=1` 后会使用本地 fallback，适合验证上传、框选、日志、回贴和导出流程。但真实图像修改效果需要配置 `TEXT_OPENAI_API_KEY` 和 `IMAGE_OPENAI_API_KEY`。
+可以。设置 `OPENAI_DISABLE=1` 后会使用本地 fallback，适合验证上传、框选、日志、回贴和导出流程。但真实图像修改效果必须同时配置 `TEXT_OPENAI_API_KEY` 和 `IMAGE_OPENAI_API_KEY`：前者需要支持 `gpt-5.5`，后者需要支持 `gpt-image-2`。如果同一个 API Key 支持两个模型，可以两处填同一个 Key；如果只支持 `gpt-5.5`，需要单独购买或开通 `gpt-image-2` API。
 
 ### OCR 失败会不会导致任务失败？
 
